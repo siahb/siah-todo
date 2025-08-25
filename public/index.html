@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📝 Siah To Do</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="todo.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <!-- Theme Toggle -->
+  <div id="toggle-theme" class="theme-switch">
+    <label class="theme-switch">
+      <input type="checkbox" id="toggle-theme-checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="button-group">
+        <button id="enter-password">🔐 Enter Password</button>
+        <button id="logout">🚪 Logout</button>
+        <button id="help-btn">❓ Help</button>
+      </div>
+      <h1><span>✅</span> Siah To Do</h1>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="main-wrapper">
+     <div class="todo-wrapper"> 
+      <!-- To Do List -->
+      <div id="todo-wrapper" class="card-container">
+      <div class="toolbar top">
+        
+        <!-- Top bar: Search • Sort • Progress -->
+<div class="sort-and-buttons">
+  <div class="search-wrapper">
+    <button id="search-toggle" type="button" class="search-icon" aria-label="Open search" title="Ctrl+F to Show, and Esc to Hide">🔍</button>
+    <input id="search-input" type="text" placeholder="Search…">
+  </div>
+
+  <select id="sort-select">
+    <option value="default">Sort: Custom (drag)</option>
+    <option value="priority">Priority (H→L)</option>
+    <option value="dueAsc">Due date ↑</option>
+    <option value="dueDesc">Due date ↓</option>
+    <option value="alpha">A→Z</option>
+    <option value="tagsAZ">Tags (A→Z)</option>
+    <option value="created">Newest</option>
+  </select>
+
+  <div class="spacer"></div> <!-- pushes progress to the far right -->
+
+  <div id="progress-inline">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="progress-label" style="font-size:.9rem;opacity:.8;"></div>
+</div>
+        <!-- Add Task -->
+        <input type="text" id="todo-input" placeholder="Type a task and hit Enter..." />
+
+        <!-- Tags + Priority below enter -->
+        <div class="toolbar below-enter">
+          <div class="field-wrap">
+            <label for="tag-input" class="tag-label">Tags:</label>
+            <input id="tag-input" type="text" placeholder="chores, projects, etc...">
+          </div>
+
+          <div class="field-wrap">
+            <label for="priority-select" class="priority-label">Priority:</label>
+            <select id="priority-select">
+              <option value="">None</option>
+              <option value="H">High 🔥</option>
+              <option value="M">Medium ⚡</option>
+              <option value="L">Low 🌿</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Due + Repeat -->
+        <div class="repeat-row">
+          <label for="due-input">Due:</label>
+            <input type="date" id="due-input">
+            <button id="due-today" type="button" class="mini-btn">Today</button>
+          </label>
+          <label>Repeat:
+            <select id="repeat-select">
+              <option value="">None</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </label>
+          <label id="interval-wrap" style="display:none;">Every
+            <input type="number" id="interval-input" min="1" value="1" style="width:4rem;">
+            <span class="interval-unit">day(s)</span>
+          </label>
+          <div id="weekly-wrap" style="display:none; gap:.4rem; align-items:center;">
+            <span>Days:</span>
+            <label><input type="checkbox" value="0" class="byweekday">Sun</label>
+            <label><input type="checkbox" value="1" class="byweekday">Mon</label>
+            <label><input type="checkbox" value="2" class="byweekday">Tue</label>
+            <label><input type="checkbox" value="3" class="byweekday">Wed</label>
+            <label><input type="checkbox" value="4" class="byweekday">Thu</label>
+            <label><input type="checkbox" value="5" class="byweekday">Fri</label>
+            <label><input type="checkbox" value="6" class="byweekday">Sat</label>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+  <!-- Add the Select Mode button -->
+  <button id="select-mode-btn" title="Toggle selection mode">☐ Select</button>
+  
+  <!-- Add Select All checkbox (will be hidden by default) -->
+  <input type="checkbox" id="select-all" title="Select/deselect all todos">
+  <label for="select-all" style="margin-right: 1rem;">Select All</label>
+  
+  <!-- Your existing buttons -->
+  <button id="delete-btn" onclick="deleteSelected()">🗑️ Delete Selected</button>
+  <button id="undo-btn">↩️ Undo</button>
+  <button id="toggle-drag">↕️ Reorder</button>
+  <button id="save-order" type="button">💾 Save Order</button>
+</div>
+
+        <ul id="todo-list"></ul>
+        
+          <hr class="divider">
+          <h2>Marked as Done ✅</h2>
+          <ul id="done-list"></ul>
+
+      </div> <!-- closes todo-container -->
+     </div>
+    </div> <!-- closes main-wrapper -->
+  </div> <!-- closes main-content -->
+    
+  <!-- Admin Modal -->
+  <div id="admin-modal" class="modal">
+    <div class="modal-content">
+      <h2>Admin Login</h2>
+      <input type="password" id="password-input" placeholder="Password" />
+      <div class="modal-buttons">
+        <button id="login-btn">Login</button>
+        <button id="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Back Button -->
+  <div class="back-button-wrapper">
+    <a href="https://siahverse.cc/" class="back-button">Back to Portal</a>
+  </div>
+ <!-- Add this modal HTML before your closing </body> tag -->
+<div id="help-modal" class="modal">
+  <div class="modal-content help-modal-content">
+    <div class="modal-header">
+      <h2>📝 How to Use Siah To Do</h2>
+      <span class="close-help">&times;</span>
+    </div>
+    
+    <div class="modal-body">
+      <h3>🚀 Getting Started</h3>
+      <ol>
+        <li><strong>Login:</strong> Click "🔐 Enter Password" and enter your admin password</li>
+        <li><strong>Add Tasks:</strong> Type in the main input field and press <span class="kbd">Enter</span></li>
+        <li><strong>Set Properties:</strong> Add tags, priority, due dates, and repeating schedules before pressing Enter</li>
+      </ol>
+
+      <h3>⌨️ Keyboard Shortcuts</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Search</h4>
+          <ul>
+            <li><span class="kbd">Ctrl</span> + <span class="kbd">F</span> - Open search</li>
+            <li><span class="kbd">/</span> - Quick search</li>
+            <li><span class="kbd">Esc</span> - Close search</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h4>Adding Tasks</h4>
+          <ul>
+            <li><span class="kbd">Enter</span> - Add task (from any input)</li>
+            <li><span class="kbd">Tab</span> - Navigate between fields</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>🔍 Special Search Terms</h3>
+      <p>Use these special searches to quickly filter your tasks:</p>
+      <ul>
+        <li><code>untagged</code> or <code>no-tags</code> - Find tasks without tags</li>
+        <li><code>high</code> or <code>p:high</code> - Show high priority tasks <span class="pill-demo pill-high">!!!</span></li>
+        <li><code>medium</code> or <code>p:medium</code> - Show medium priority tasks <span class="pill-demo pill-medium">!!</span></li>
+        <li><code>low</code> or <code>p:low</code> - Show low priority tasks <span class="pill-demo pill-low">!</span></li>
+        <li><code>no-priority</code> or <code>p:none</code> - Show tasks without priority</li>
+      </ul>
+
+      <h3>📋 Task Management</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Task Actions</h4>
+          <ul>
+            <li><strong>✅</strong> - Mark as done (or advance repeating tasks)</li>
+            <li><strong>✏️</strong> - Edit task inline</li>
+            <li><strong>❌</strong> - Delete task</li>
+            <li><strong>↩️</strong> - Undo (restore deleted tasks)</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h4>Bulk Actions</h4>
+          <ul>
+            <li>Select multiple tasks with checkboxes</li>
+            <li>Use "🗑️ Delete Selected" for bulk deletion</li>
+            <li>Select All checkbox in header</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>📅 Scheduling & Repeating</h3>
+      <h4>Due Dates</h4>
+      <ul>
+        <li>Set due dates with the date picker</li>
+        <li>Click "Today" button for quick date setting</li>
+        <li>Overdue tasks show <span class="pill-demo pill-overdue">Overdue</span> pills</li>
+      </ul>
+
+      <h4>Repeating Tasks</h4>
+      <ul>
+        <li><strong>Daily:</strong> Repeats every X days</li>
+        <li><strong>Weekly:</strong> Choose specific days of the week</li>
+        <li>When you complete a repeating task, it automatically advances to the next occurrence</li>
+      </ul>
+
+      <h3>🏷️ Tags & Priority</h3>
+      <h4>Tags</h4>
+      <ul>
+        <li>Add multiple tags separated by commas: <code>work, urgent, meeting</code></li>
+        <li>Search by tag name to filter tasks</li>
+        <li>Use <code>untagged</code> search to find tasks that need tags</li>
+      </ul>
+
+      <h4>Priority Levels</h4>
+      <ul>
+        <li><span class="pill-demo pill-high">!!! High</span> - Critical/urgent tasks (red)</li>
+        <li><span class="pill-demo pill-medium">!! Medium</span> - Important tasks (orange)</li>
+        <li><span class="pill-demo pill-low">! Low</span> - Nice to have tasks (green)</li>
+      </ul>
+
+      <h3>📊 Sorting & Organization</h3>
+      <ul>
+        <li><strong>Custom (drag):</strong> Drag and drop to reorder (click "↕️ Reorder" first)</li>
+        <li><strong>Priority:</strong> High to low priority</li>
+        <li><strong>Due date:</strong> Ascending or descending</li>
+        <li><strong>A-Z:</strong> Alphabetical by task name</li>
+        <li><strong>Newest:</strong> Most recently created first</li>
+      </ul>
+
+      <h3>💡 Pro Tips</h3>
+      <ul>
+        <li>Use the <code>untagged</code> search to find and organize tasks without tags</li>
+        <li>Priority search terms help you focus: try <code>high</code> to see urgent tasks</li>
+        <li>The progress bar shows completion percentage and overdue task count</li>
+        <li>Done tasks are collapsible - click the "Marked as Done ✅" header</li>
+        <li>Drag reordering only works when sorted by "Custom (drag)"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="modal">
+  <div class="modal-content delete-modal-content">
+    <div class="modal-header">
+      <h2>🗑️ Confirm Deletion</h2>
+    </div>
+    <div class="modal-body">
+      <p id="delete-message">Are you sure you want to delete this task?</p>
+      <div class="delete-task-preview" id="delete-preview">
+        <!-- Task preview will be populated by JavaScript -->
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-top: 1rem;">
+        💡 You can use the Undo button to restore deleted tasks.
+      </p>
+    </div>
+    <div class="modal-buttons">
+      <button id="cancel-delete-btn" class="delete-cancel-btn">Cancel</button>
+      <button id="confirm-delete-btn" class="delete-confirm-btn">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+<script src="todo.js"></script>
+</body>
+</html>
